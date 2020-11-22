@@ -13,8 +13,7 @@
 double f ( double x ); //Implementiert die Funktion f. x
 void Wertetabelle ( double a, double b, int N ); //Gibt Argument und Funktionswert tabellarisch aus. x
 bool Einschluss ( double fa, double fb ); //Überprüft, ob die beiden Argumente unterschiedliche Vorzeichen besitzen. x
-double Bisektion ( double a, double b, double eps ); //Überpruft zunächst, ob [a,b] eine Nullstelle enthält und ruft dann die eigentliche Bisektionsmethode Bisec_rec() auf. x
-double Bisec_rec ( double a, double b, double eps ); //Implementierung der Bisektionsmethode. x
+double SekVerfahren ( double a, double b, double eps ); //Überpruft zunächst, ob [a,b] eine Nullstelle enthält und verfährt dann nach der SekVerfahrensmethode. x
 double MPRegel ( double a, double b, int N ); //Nähert das Integral von a bis b über f(x)dx an. x
 int Sign( double a ); //Gibt das Vorzeichen von a aus (-1, 0, 1). x
 double Read_double(std::string text);
@@ -24,30 +23,30 @@ int main ()
 {
     double a1, b1, a2, b2;
     double eps;
-    
+
     std::cout << "Einlesen des ersten Intervalls [a1,b1], was genau eine Nullstelle enthält.\n";
     a1 = Read_double("Geben Sie a1 ein.");
     b1 = Read_double("Geben Sie b1 ein.");
-    
+
     std::cout << "Einlesen des zweiten Intervalls [a2,b2], was genau eine Nullstelle enthält.\n";
     a2 = Read_double("Geben Sie a2 ein.");
     b2 = Read_double("Geben Sie b2 ein.");
-    
-    eps = Read_double("Geben Sie die angestrebte Intervalllänge für die Bisektionsmethode ein.");
-    
+
+    eps = Read_double("Geben Sie das Epsilon für das Sekantenverfahren ein.");
+
     std::cout << "Berechne Nullstellen... ";
     double n1, n2;
-    n1 = Bisektion(a1, b1, eps);
-    n2 = Bisektion(a2, b2, eps);
+    n1 = SekVerfahren(a1, b1, eps);
+    n2 = SekVerfahren(a2, b2, eps);
     std::cout << "Fertig! Weiter geht's.\n";
-    
+
     int N;
     N = Read_int("Geben Sie die Anzahl der Rechtecke für die summierte Mittelpunktsregel ein.");
     std::cout << "Berechne die positive Fläche des Graphen...";
     double A = MPRegel(n1, n2, N);
     std::cout << "Fertig!\nDie Fläche lautet: " << A << " FE.\n";
-    
-    
+
+
 }
 
 double f ( double x )
@@ -92,34 +91,34 @@ double MPRegel ( double a, double b, int N )
     return h*sum;
 }
 
-double Bisec_rec ( double a, double b, double eps )
+double SekVerfahren ( double a, double b, double eps )
 {
-    double m = (a+b)/2;
-    if ( b - a < eps ) //Abbruchbedingung
-    {
-        return m;
-        
-    }
-    else if ( Einschluss( f(a), f(m)) )
-    {
-        return Bisec_rec( a, m, eps );
-    }
-    else if ( Einschluss(f(m), f(b)) )
-    {
-        return Bisec_rec( m, b, eps );
-    }
-    else
-    {
-        return m;
-    }
-}
+    double fa = 0;
+    double fb = 0;
+    double m = 0;
+    double fm = 0;
+    double m_old = 0;
 
-double Bisektion ( double a, double b, double eps )
-{
-    if (Einschluss(f(a), f(b)))
-        return Bisec_rec(a, b, eps);
-    std::cout << "Kein Einschluss gefunden.\n";
-    return 0;
+
+   do {
+        fa = f(a);
+        fb = f(b);
+        m = -(b*fa-a*fb)/(fb-fa);
+        fm = f(m);
+
+        if ( Einschluss(fa, fm) )
+        {
+            b = m;
+        } else if ( Einschluss(fm, fb) )
+        {
+            a = m;
+        } else {
+            std::cout << "Fehler! Das betreffende Intervall besitzt keinen Einschluss!";
+            return 0.0;
+        }
+       m_old = m;
+   }  while (std::abs(m-m_old) >= eps or std::abs(fm) >= eps);
+    return m;
 }
 
 double Read_double ( std::string text )
